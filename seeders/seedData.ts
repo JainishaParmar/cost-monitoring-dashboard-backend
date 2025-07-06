@@ -59,32 +59,22 @@ function generateCost(service: AwsService): number {
   return parseFloat((baseCost * randomFactor * varianceFactor).toFixed(4));
 }
 
-function generateDateRange(): Date[] {
-  const dates: Date[] = [];
-  const endDate = new Date();
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() - 30);
-  
-  for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-    dates.push(new Date(d));
-  }
-  
-  return dates;
+function getRandomDateInRange(start: Date, end: Date): Date {
+  const startTime = start.getTime();
+  const endTime = end.getTime();
+  return new Date(startTime + Math.random() * (endTime - startTime));
 }
 
 /**
  * Data Generation
- * Create exactly 50 cost records with realistic patterns
+ * Create exactly 100 cost records with realistic patterns
  */
 async function generateCostData(): Promise<CostRecordCreationAttributes[]> {
   const costRecords: CostRecordCreationAttributes[] = [];
-  const dates = generateDateRange();
-  
-  console.log('📊 Generating exactly 50 cost records...');
-  
-  let recordCount = 0;
-  const maxRecords = 50;
-  
+  const recordCount = 100;
+  const startDate = new Date('2025-01-01');
+  const endDate = new Date('2025-07-05');
+
   const usageTypes: Record<string, string[]> = {
     'EC2': ['BoxUsage', 'DataTransfer', 'EBSOptimization'],
     'S3': ['StorageUsage', 'DataTransfer', 'Requests'],
@@ -97,39 +87,52 @@ async function generateCostData(): Promise<CostRecordCreationAttributes[]> {
     'ECS': ['FargateUsage', 'DataTransfer'],
     'CloudWatch': ['Metrics', 'Logs', 'Alarms']
   };
-  
-  for (const date of dates) {
-    for (const service of awsServices) {
-      if (recordCount >= maxRecords) break;
-      
-      // Generate 1-2 records per service per day for variety
-      const recordsPerDay = Math.floor(Math.random() * 2) + 1;
-      
-      for (let i = 0; i < recordsPerDay && recordCount < maxRecords; i++) {
-        const costAmount = generateCost(service);
-        const region = regions[Math.floor(Math.random() * regions.length)] || 'us-east-1';
-        const accountId = accountIds[Math.floor(Math.random() * accountIds.length)] || '123456789012';
-        
-        const serviceUsageTypes = usageTypes[service.name] || ['Usage'];
-        const usageType = serviceUsageTypes[Math.floor(Math.random() * serviceUsageTypes.length)] || 'Usage';
-        
-        costRecords.push({
-          date: date,
-          serviceName: service.name,
-          costAmount: costAmount,
-          region: region,
-          accountId: accountId,
-          resourceId: `${service.name.toLowerCase()}-${Math.random().toString(36).substr(2, 8)}`,
-          usageType: usageType,
-          description: `${service.name} ${usageType} usage in ${region}`
-        });
-        
-        recordCount++;
-      }
-    }
-    if (recordCount >= maxRecords) break;
+
+  // To ensure all months are represented, generate at least 1 record per month first
+  const months = [0,1,2,3,4,5,6]; // Jan to July (0-indexed)
+  for (const month of months) {
+    const year = 2025;
+    const day = Math.floor(Math.random() * 28) + 1; // Safe for all months
+    const date = new Date(year, month, day);
+    const service = awsServices[Math.floor(Math.random() * awsServices.length)]!;
+    const costAmount = generateCost(service);
+    const region = regions[Math.floor(Math.random() * regions.length)] || 'us-east-1';
+    const accountId = accountIds[Math.floor(Math.random() * accountIds.length)] || '123456789012';
+    const serviceUsageTypes = usageTypes[service.name] || ['Usage'];
+    const usageType = serviceUsageTypes[Math.floor(Math.random() * serviceUsageTypes.length)] || 'Usage';
+    costRecords.push({
+      date: date,
+      serviceName: service.name,
+      costAmount: costAmount,
+      region: region,
+      accountId: accountId,
+      resourceId: `${service.name.toLowerCase()}-${Math.random().toString(36).substr(2, 8)}`,
+      usageType: usageType,
+      description: `${service.name} ${usageType} usage in ${region}`
+    });
   }
-  
+
+  // Generate the rest randomly
+  for (let i = costRecords.length; i < recordCount; i++) {
+    const date = getRandomDateInRange(startDate, endDate);
+    const service = awsServices[Math.floor(Math.random() * awsServices.length)]!;
+    const costAmount = generateCost(service);
+    const region = regions[Math.floor(Math.random() * regions.length)] || 'us-east-1';
+    const accountId = accountIds[Math.floor(Math.random() * accountIds.length)] || '123456789012';
+    const serviceUsageTypes = usageTypes[service.name] || ['Usage'];
+    const usageType = serviceUsageTypes[Math.floor(Math.random() * serviceUsageTypes.length)] || 'Usage';
+    costRecords.push({
+      date: date,
+      serviceName: service.name,
+      costAmount: costAmount,
+      region: region,
+      accountId: accountId,
+      resourceId: `${service.name.toLowerCase()}-${Math.random().toString(36).substr(2, 8)}`,
+      usageType: usageType,
+      description: `${service.name} ${usageType} usage in ${region}`
+    });
+  }
+
   return costRecords;
 }
 
