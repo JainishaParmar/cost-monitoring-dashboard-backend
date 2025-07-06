@@ -1,4 +1,3 @@
-import { Request, Response, NextFunction } from 'express';
 import { Model, Optional } from 'sequelize';
 
 // Database Models
@@ -74,30 +73,4 @@ export interface ApiResponse<T = unknown> {
 
 export interface PaginatedResponse<T> extends ApiResponse<T[]> {
   pagination: PaginationInfo;
-}
-
-// Express Types
-export interface TypedRequest<T = unknown> extends Request {
-  body: T;
-}
-
-export interface TypedResponse<T = unknown> extends Response {
-  json: (body: ApiResponse<T>) => this;
-}
-
-export type RequestHandler<T = unknown> = (
-  req: TypedRequest<T>,
-  res: TypedResponse,
-  next: NextFunction
-) => Promise<void> | void;
-
-// Error Types
-export interface ValidationError {
-  field: string;
-  message: string;
-}
-
-export interface ApiError extends Error {
-  status?: number;
-  errors?: ValidationError[];
 }
