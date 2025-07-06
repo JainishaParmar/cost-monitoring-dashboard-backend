@@ -28,10 +28,15 @@ module.exports = {
     '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
-    '@typescript-eslint/no-explicit-any': 'warn',
+    '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/ban-ts-comment': 'off',
     'no-console': 'off',
     'max-len': ['error', { code: 120 }],
-    'dot-notation': 'off'
+    'dot-notation': 'off',
+    'no-shadow': 'off',
+    'no-param-reassign': 'off',
+    'max-classes-per-file': 'off',
+    'default-param-last': 'off'
   },
   settings: {
     'import/resolver': {

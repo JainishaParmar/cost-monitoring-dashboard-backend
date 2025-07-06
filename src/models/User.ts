@@ -14,9 +14,13 @@ interface UserCreationAttributes extends Omit<UserAttributes, 'id' | 'createdAt'
 
 class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
   public id!: number;
+
   public email!: string;
+
   public password!: string;
+
   public readonly createdAt!: Date;
+
   public readonly updatedAt!: Date;
 
   // Instance method to compare password
@@ -73,7 +77,7 @@ User.init(
         }
       },
     },
-  }
+  },
 );
 
-export default User; 
+export default User;

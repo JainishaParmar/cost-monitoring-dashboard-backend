@@ -7,7 +7,9 @@ import dotenv from 'dotenv';
 
 import sequelize from './config/database';
 import costRoutes from './routes/costRoutes';
+import authRoutes from './routes/authRoutes';
 import errorHandler from './middleware/errorHandler';
+import { log } from './utils/logger';
 
 // Load environment variables
 dotenv.config();
@@ -48,7 +50,7 @@ if (process.env['NODE_ENV'] === 'development') {
 
 /**
  * API Routes
- * Health check and cost management endpoints
+ * Health check and authentication endpoints
  */
 
 // Health check endpoint
@@ -61,6 +63,7 @@ app.get('/health', (_req, res) => {
 });
 
 // API routes
+app.use('/api/auth', authRoutes);
 app.use('/api/costs', costRoutes);
 
 // 404 handler for undefined routes
@@ -76,26 +79,25 @@ app.use(errorHandler);
 
 /**
  * Server Startup
- * Database connection and server initialization
+ * Server initialization without database
  */
 async function startServer(): Promise<void> {
   try {
-    // Test database connection
     await sequelize.authenticate();
-    console.log('✅ Database connection established successfully.');
-
-    // Sync database models
+    log.info('Database connection established successfully');
     await sequelize.sync({ alter: true });
-    console.log('✅ Database models synchronized.');
-
+    log.info('Database models synchronized');
     // Start server
     app.listen(PORT, () => {
-      console.log(`🚀 Server is running on port ${PORT}`);
-      console.log(`📊 Cost Monitoring API: http://localhost:${PORT}`);
-      console.log(`🔍 Health check: http://localhost:${PORT}/health`);
+      log.info('Server started successfully', {
+        port: PORT,
+        apiUrl: `http://localhost:${PORT}`,
+        healthCheck: `http://localhost:${PORT}/health`,
+        authEndpoint: `http://localhost:${PORT}/api/auth/login`,
+      });
     });
   } catch (error) {
-    console.error('❌ Error starting server:', error);
+    log.error('Failed to start server', { error: error instanceof Error ? error.message : 'Unknown error' });
     process.exit(1);
   }
 }
