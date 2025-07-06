@@ -1,5 +1,5 @@
 import { Op, fn, col } from 'sequelize';
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import CostRecord from '../models/CostRecord';
 import {
   FilterQuery,
@@ -23,7 +23,7 @@ const costController = {
    * Get all cost records with pagination and filtering
    * Supports filtering by date range, service, region, and account
    */
-  async getCostRecords(req: Request<object, object, object, FilterQuery>, res: Response): Promise<void> {
+  async getCostRecords(req: Request<object, object, object, FilterQuery>, res: Response, next: NextFunction): Promise<void> {
     try {
       const {
         page = '1',
@@ -100,7 +100,7 @@ const costController = {
         error: error instanceof Error ? error.message : 'Unknown error',
         filters: req.query,
       });
-      throw new DatabaseError('Failed to fetch cost records');
+      return next(new DatabaseError('Failed to fetch cost records'));
     }
   },
 
@@ -109,7 +109,7 @@ const costController = {
    * Get cost summary aggregated by service
    * Returns total cost and record count per service
    */
-  async getCostSummaryByService(req: Request<object, object, object, FilterQuery>, res: Response): Promise<void> {
+  async getCostSummaryByService(req: Request<object, object, object, FilterQuery>, res: Response, next: NextFunction): Promise<void> {
     try {
       const {
         startDate, endDate, region, accountId,
@@ -168,7 +168,7 @@ const costController = {
         error: error instanceof Error ? error.message : 'Unknown error',
         filters: req.query,
       });
-      throw new DatabaseError('Failed to fetch cost summary');
+      return next(new DatabaseError('Failed to fetch cost summary'));
     }
   },
 
@@ -177,7 +177,7 @@ const costController = {
    * Get cost trends over time (daily aggregation)
    * Returns daily cost totals for trend analysis
    */
-  async getCostTrends(req: Request<object, object, object, FilterQuery>, res: Response): Promise<void> {
+  async getCostTrends(req: Request<object, object, object, FilterQuery>, res: Response, next: NextFunction): Promise<void> {
     try {
       const {
         startDate, endDate, serviceName, region, accountId,
@@ -238,7 +238,7 @@ const costController = {
         error: error instanceof Error ? error.message : 'Unknown error',
         filters: req.query,
       });
-      throw new DatabaseError('Failed to fetch cost trends');
+      return next(new DatabaseError('Failed to fetch cost trends'));
     }
   },
 
@@ -247,7 +247,7 @@ const costController = {
    * Get available filter options for the frontend
    * Returns distinct values for services, regions, and accounts
    */
-  async getAvailableFilters(_req: Request, res: Response): Promise<void> {
+  async getAvailableFilters(_req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const [services, regions, accounts] = await Promise.all([
         CostRecord.findAll({
@@ -286,7 +286,7 @@ const costController = {
       log.error('Error fetching available filters', {
         error: error instanceof Error ? error.message : 'Unknown error',
       });
-      throw new DatabaseError('Failed to fetch available filters');
+      return next(new DatabaseError('Failed to fetch available filters'));
     }
   },
 
@@ -295,7 +295,7 @@ const costController = {
    * Create a new cost record
    * Validates required fields and creates the record
    */
-  async createCostRecord(req: Request<object, object, CostRecordCreationAttributes>, res: Response): Promise<void> {
+  async createCostRecord(req: Request<object, object, CostRecordCreationAttributes>, res: Response, next: NextFunction): Promise<void> {
     try {
       const costRecord = await CostRecord.create(req.body);
 
@@ -317,7 +317,7 @@ const costController = {
         error: error instanceof Error ? error.message : 'Unknown error',
         data: req.body,
       });
-      throw new DatabaseError('Failed to create cost record');
+      return next(new DatabaseError('Failed to create cost record'));
     }
   },
 
@@ -326,13 +326,13 @@ const costController = {
    * Update an existing cost record
    * Validates the record exists before updating
    */
-  async updateCostRecord(req: Request<{ id: string }>, res: Response): Promise<void> {
+  async updateCostRecord(req: Request<{ id: string }>, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id } = req.params;
       const costRecord = await CostRecord.findByPk(id);
 
       if (!costRecord) {
-        throw new NotFoundError('Cost record not found');
+        return next(new NotFoundError('Cost record not found'));
       }
 
       await costRecord.update(req.body);
@@ -350,16 +350,12 @@ const costController = {
 
       res.json(response);
     } catch (error) {
-      if (error instanceof NotFoundError) {
-        throw error;
-      }
-
       log.error('Error updating cost record', {
         error: error instanceof Error ? error.message : 'Unknown error',
         recordId: req.params.id,
         data: req.body,
       });
-      throw new DatabaseError('Failed to update cost record');
+      return next(new DatabaseError('Failed to update cost record'));
     }
   },
 
@@ -368,13 +364,13 @@ const costController = {
    * Delete a cost record
    * Validates the record exists before deletion
    */
-  async deleteCostRecord(req: Request<{ id: string }>, res: Response): Promise<void> {
+  async deleteCostRecord(req: Request<{ id: string }>, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id } = req.params;
       const costRecord = await CostRecord.findByPk(id);
 
       if (!costRecord) {
-        throw new NotFoundError('Cost record not found');
+        return next(new NotFoundError('Cost record not found'));
       }
 
       await costRecord.destroy();
@@ -391,15 +387,11 @@ const costController = {
 
       res.json(response);
     } catch (error) {
-      if (error instanceof NotFoundError) {
-        throw error;
-      }
-
       log.error('Error deleting cost record', {
         error: error instanceof Error ? error.message : 'Unknown error',
         recordId: req.params.id,
       });
-      throw new DatabaseError('Failed to delete cost record');
+      return next(new DatabaseError('Failed to delete cost record'));
     }
   },
 };

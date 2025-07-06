@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import User from '../models/User';
 import { generateTokens, verifyRefreshToken } from '../utils/jwt';
 import { log } from '../utils/logger';
@@ -26,7 +26,7 @@ interface LoginRequest extends Request {
 /**
  * Register a new user
  */
-export const register = async (req: RegisterRequest, res: Response): Promise<void> => {
+export const register = async (req: RegisterRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { email, password } = req.body;
 
@@ -50,21 +50,21 @@ export const register = async (req: RegisterRequest, res: Response): Promise<voi
     });
   } catch (error) {
     if (error instanceof ValidationError || error instanceof ConflictError) {
-      throw error;
+      return next(error);
     }
 
     log.error('Registration error', {
       error: error instanceof Error ? error.message : 'Unknown error',
       email: req.body.email,
     });
-    throw error;
+    return next(error);
   }
 };
 
 /**
  * Login user with database credentials
  */
-export const login = async (req: LoginRequest, res: Response): Promise<void> => {
+export const login = async (req: LoginRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { email, password } = req.body;
 
@@ -100,21 +100,21 @@ export const login = async (req: LoginRequest, res: Response): Promise<void> => 
     });
   } catch (error) {
     if (error instanceof ValidationError || error instanceof AuthenticationError) {
-      throw error;
+      return next(error);
     }
 
     log.error('Login error', {
       error: error instanceof Error ? error.message : 'Unknown error',
       email: req.body.email,
     });
-    throw error;
+    return next(error);
   }
 };
 
 /**
  * Refresh access token
  */
-export const refreshToken = async (req: Request, res: Response): Promise<void> => {
+export const refreshToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { refreshToken } = req.body;
 
@@ -150,20 +150,20 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
     });
   } catch (error) {
     if (error instanceof ValidationError || error instanceof NotFoundError) {
-      throw error;
+      return next(error);
     }
 
     log.error('Refresh token error', {
       error: error instanceof Error ? error.message : 'Unknown error',
     });
-    throw new AuthenticationError('Invalid refresh token');
+    return next(new AuthenticationError('Invalid refresh token'));
   }
 };
 
 /**
  * Logout user
  */
-export const logout = async (req: Request, res: Response): Promise<void> => {
+export const logout = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     // In a more sophisticated implementation, you might want to blacklist the refresh token
     // For now, we'll just return a success response
@@ -177,14 +177,14 @@ export const logout = async (req: Request, res: Response): Promise<void> => {
     log.error('Logout error', {
       error: error instanceof Error ? error.message : 'Unknown error',
     });
-    throw error;
+    return next(error);
   }
 };
 
 /**
  * Get current user profile
  */
-export const getProfile = async (req: Request, res: Response): Promise<void> => {
+export const getProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     // Get user info from req.user (set by authentication middleware)
     // @ts-ignore
@@ -201,12 +201,12 @@ export const getProfile = async (req: Request, res: Response): Promise<void> => 
     });
   } catch (error) {
     if (error instanceof AuthenticationError) {
-      throw error;
+      return next(error);
     }
 
     log.error('Get profile error', {
       error: error instanceof Error ? error.message : 'Unknown error',
     });
-    throw error;
+    return next(error);
   }
 };
