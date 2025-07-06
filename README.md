@@ -1,6 +1,6 @@
 # Cost Monitoring Backend API
 
-A robust Node.js/TypeScript backend API for monitoring and analyzing AWS cost data. This application provides RESTful endpoints for cost tracking, user authentication, and cost analytics with comprehensive filtering and aggregation capabilities.
+A robust Node.js/TypeScript backend API for monitoring and analyzing AWS cost data. This application provides user authentication, and cost analytics with comprehensive filtering and aggregation capabilities.
 
 ## 🚀 Features
 
@@ -376,10 +376,6 @@ npm run lint
 # Fix linting issues
 npm run lint:fix
 ```
-
-## 📄 License
-
-This project is licensed under the ISC License.
 
 ## 🤝 Contributing
 
