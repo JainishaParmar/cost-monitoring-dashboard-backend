@@ -388,11 +388,3 @@ This project is licensed under the ISC License.
 3. Make your changes
 4. Run tests and linting
 5. Submit a pull request
-
-## 📞 Support
-
-For support and questions, please open an issue in the repository or contact the development team.
-
----
-
-**Note**: Remember to change the JWT secrets in production and never commit sensitive information to version control. 
