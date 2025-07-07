@@ -34,9 +34,9 @@ export interface PaginationQuery {
 export interface FilterQuery extends PaginationQuery {
   startDate?: string;
   endDate?: string;
-  serviceName?: string;
-  region?: string;
-  accountId?: string;
+  serviceName?: string | string[];
+  region?: string | string[];
+  accountId?: string | string[];
 }
 
 export interface CostSummaryItem {

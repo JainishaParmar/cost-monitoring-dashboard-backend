@@ -24,7 +24,7 @@ export const generateAccessToken = (userId: number, email: string): string => {
   };
 
   return jwt.sign(payload, process.env['JWT_SECRET'] as string, {
-    expiresIn: process.env['JWT_EXPIRES_IN'] || '15m',
+    expiresIn: process.env['JWT_EXPIRES_IN'] || '30m',
   } as jwt.SignOptions);
 };
 
@@ -51,7 +51,7 @@ export const generateTokens = (userId: number, email: string): TokenResponse => 
   const refreshToken = generateRefreshToken(userId, email);
 
   // Calculate expiration time in seconds
-  const expiresIn = 15 * 60; // 15 minutes in seconds
+  const expiresIn = 30 * 60; // 30 minutes in seconds
 
   return {
     accessToken,
