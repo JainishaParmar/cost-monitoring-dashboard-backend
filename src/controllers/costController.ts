@@ -53,19 +53,37 @@ const costController = {
         };
       }
 
-      // Add service filter
+      // Add service filter - support multiple values
       if (serviceName) {
-        whereClause['serviceName'] = serviceName;
+        if (Array.isArray(serviceName)) {
+          whereClause['serviceName'] = {
+            [Op.in]: serviceName,
+          };
+        } else {
+          whereClause['serviceName'] = serviceName;
+        }
       }
 
-      // Add region filter
+      // Add region filter - support multiple values
       if (region) {
-        whereClause['region'] = region;
+        if (Array.isArray(region)) {
+          whereClause['region'] = {
+            [Op.in]: region,
+          };
+        } else {
+          whereClause['region'] = region;
+        }
       }
 
-      // Add account filter
+      // Add account filter - support multiple values
       if (accountId) {
-        whereClause['accountId'] = accountId;
+        if (Array.isArray(accountId)) {
+          whereClause['accountId'] = {
+            [Op.in]: accountId,
+          };
+        } else {
+          whereClause['accountId'] = accountId;
+        }
       }
 
       const { count, rows } = await CostRecord.findAndCountAll({
@@ -112,7 +130,7 @@ const costController = {
   async getCostSummaryByService(req: Request<object, object, object, FilterQuery>, res: Response, next: NextFunction): Promise<void> {
     try {
       const {
-        startDate, endDate, region, accountId,
+        startDate, endDate, region, accountId, serviceName,
       } = req.query;
       const whereClause: Record<string, unknown> = {};
 
@@ -122,12 +140,37 @@ const costController = {
         };
       }
 
+      // Add region filter - support multiple values
       if (region) {
-        whereClause['region'] = region;
+        if (Array.isArray(region)) {
+          whereClause['region'] = {
+            [Op.in]: region,
+          };
+        } else {
+          whereClause['region'] = region;
+        }
       }
 
+      // Add account filter - support multiple values
       if (accountId) {
-        whereClause['accountId'] = accountId;
+        if (Array.isArray(accountId)) {
+          whereClause['accountId'] = {
+            [Op.in]: accountId,
+          };
+        } else {
+          whereClause['accountId'] = accountId;
+        }
+      }
+
+      // Add service filter - support multiple values
+      if (serviceName) {
+        if (Array.isArray(serviceName)) {
+          whereClause['serviceName'] = {
+            [Op.in]: serviceName,
+          };
+        } else {
+          whereClause['serviceName'] = serviceName;
+        }
       }
 
       const summary = await CostRecord.findAll({
@@ -158,7 +201,7 @@ const costController = {
       log.info('Cost summary fetched successfully', {
         summaryCount: formattedSummary.length,
         filters: {
-          startDate, endDate, region, accountId,
+          startDate, endDate, region, accountId, serviceName,
         },
       });
 
@@ -190,16 +233,37 @@ const costController = {
         };
       }
 
+      // Add service filter - support multiple values
       if (serviceName) {
-        whereClause['serviceName'] = serviceName;
+        if (Array.isArray(serviceName)) {
+          whereClause['serviceName'] = {
+            [Op.in]: serviceName,
+          };
+        } else {
+          whereClause['serviceName'] = serviceName;
+        }
       }
 
+      // Add region filter - support multiple values
       if (region) {
-        whereClause['region'] = region;
+        if (Array.isArray(region)) {
+          whereClause['region'] = {
+            [Op.in]: region,
+          };
+        } else {
+          whereClause['region'] = region;
+        }
       }
 
+      // Add account filter - support multiple values
       if (accountId) {
-        whereClause['accountId'] = accountId;
+        if (Array.isArray(accountId)) {
+          whereClause['accountId'] = {
+            [Op.in]: accountId,
+          };
+        } else {
+          whereClause['accountId'] = accountId;
+        }
       }
 
       const trends = await CostRecord.findAll({
